@@ -8,44 +8,51 @@
 	font-size: 1em;
 }
 
-/* global*/
-body{
+/* global */
+body {
     font-family: "Lato";
+    transform: scale(1.3); /* Define o zoom para 150% */
+    transform-origin: 0 0; /* Define a origem do zoom no canto superior esquerdo */
+    width: 80%; /* Garante que o corpo ocupe toda a largura da tela */
+    height: 100%; /* Garante que o corpo ocupe toda a altura da tela */
+    overflow: hidden; /* Remove barras de rolagem */
 }
-
-.container{
+.content {
+    width: 66.67%; /* Ajusta a largura para compensar o zoom */
+}
+.container {
     margin: 0 auto;
     max-width: 1100px;
 }
 
-img{
-    max-width: 100%;
+img {
+    max-width: 150%;
 }
 
 /* header */
 /* nav */
-.main-header{
+.main-header {
     width: 100%;
-    margin-bottom: 1.2em;
-    background-color: #eee;
+    margin-bottom: 1.0em;
+    background-color: #F5E5F0;
     padding: 1em 0;
 }
 
-.brand{
-    background-image: url(../midia/logo-viavarejo.svg);
+.brand {
+    background-image: url(https://scontent.fcgh12-1.fna.fbcdn.net/v/t39.30808-6/307932773_484525057025267_2506535200659790637_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=7xH-4PcgqfcQ7kNvgEtbEd3&_nc_ht=scontent.fcgh12-1.fna&gid=AJ-B6SZBNaRU6HyLGtai5lA&oh=00_AYBQGw4ohELNe7jkUlt-jDuSG5ndozV7ntp-8Xfb1X4Q0g&oe=66B1D9AB);
     background-size: cover;
-    width: 210px;
-    background-position: 50%;
-    height: 2.75em;
+    width: 100px;
+    background-position: 100%;
+    height: 4.75em;
 }
 
-.system-title{
+.system-title {
     margin: 0 1em;
     font-size: 1.25em;
 }
 
-.navbar-menu{
-    background: #fff;
+.navbar-menu {
+    background: #F5E5F0 ;
     border-radius: 4px;
     height: 2.75em;
 }
@@ -55,7 +62,7 @@ img{
 }
 
 .navbar-menu ul {
-    border-left: 1px solid #aaa;
+    border-left: 1px solid #F5E5F0;
 }
 
 .navbar-menu ul:first-child {
@@ -79,75 +86,91 @@ img{
 .section-new-transaction {
     width: 33%;
     padding: 1em;
-    border: 1px solid #aaa;
-    border-radius: 4px;6
+    border: 1px solid #F5E5F0;
+    border-radius: 4px;
 }
+
 .section-new-transaction h1,
-.section-transaction-statement h1{
+.section-transaction-statement h1 {
     font-size: 1.125em;
     margin-bottom: 1em;
     text-align: center;
 }
 
 .section-new-transaction select,
-.section-new-transaction input{
-    border: 1px solid #aaa;
+.section-new-transaction input {
+    border: 1px solid #ff0000;
     border-radius: 3px;
     padding: 0.325em 0.5em;
     margin: 0.4em 0 1em;
     color: #aaa;
 }
 
-.section-new-transaction input::placeholder{
+.section-new-transaction input::placeholder {
     color: #ccc;
 }
 
-.section-new-transaction button{
+.section-new-transaction button {
     padding: 0.325em 0.5em;
-    border: 1px solid #aaa;
+    border: 1px solid #ff0000;
     border-radius: 3px;
 }
 
-.sale-button{
+.sale-button {
     background-color: #000;
     color: #ccc;
 }
 
-.buy-button{
-    background-color: #ccc;
+.buy-button {
+    background-color: #F5E5F0;
     color: #000;
 }
 
-.section-transaction-statement{
+.section-transaction-statement {
     width: 66%;
     padding: 1em;
     text-align: left;
 }
 
-.table-transaction-statement{
+.table-transaction-statement {
     width: 100%;
     border-collapse: collapse;
 }
 
 .table-transaction-statement thead th, 
-.table-transaction-statement td{
-    padding: 0.75em 0.2em;
-    border-bottom: 1px solid #aaa;
+.table-transaction-statement td {
+    padding: 0.75em 0.5em;
+    border-bottom: 1px solid #ff0000;
 }
 
-.table-transaction-statement tfoot th{
-    border-top: 4px double #aaa;
+.table-transaction-statement tfoot th {
+    border-top: 4px double #ff0000;
 }
 
-.section-transaction-statement td:first-child,
-.section-transaction-statement th:first-child,
-.section-transaction-statement td:last-child,
-.section-transaction-statement th:last-child{
+/* Adicionando estilos para as novas colunas */
+.table-transaction-statement th {
+    text-align: left;
+}
+
+.table-transaction-statement th:nth-child(3),
+.table-transaction-statement td:nth-child(3) {
+    text-align: center;
+}
+
+.table-transaction-statement th:nth-child(4),
+.table-transaction-statement td:nth-child(4),
+.table-transaction-statement th:nth-child(5),
+.table-transaction-statement td:nth-child(5) {
+    text-align: right;
+}
+
+.table-transaction-statement td:last-child,
+.table-transaction-statement th:last-child {
     text-align: right;
 }
 
 /* footer */
-.main-footer{
+.main-footer {
     position: fixed;
     width: 100%;
     height: 0.5em;
@@ -155,30 +178,31 @@ img{
     bottom: 0;
     background-color: #000;
 }
-.main-header .container{
+
+.main-header .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.main-header .navbar-brand{
+.main-header .navbar-brand {
     display: flex;
     align-items: center;
 }
 
 .navbar-menu,
-.navbar-menu li{
+.navbar-menu li {
     display: flex;
     align-items: center;
 }
 
-.main-content .container{
+.main-content .container {
     display: flex;
     justify-content: space-between;
 }
 
 .section-new-transaction,
-.section-new-transaction form{
+.section-new-transaction form {
     display: flex;
     flex-direction: column;
 }
