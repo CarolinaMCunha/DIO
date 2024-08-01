@@ -1,17 +1,42 @@
 <!DOCTYPE html>
-<html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width-device-width, inicial-scale=1">
     <meta name="description" content="Controle financeiro para transações de compras e vendas de mercadorias. Teste de front-end Via Varejo.">
 
-    <link rel="shortcut icon" href="resources/midia/favicon.png">
+    <link rel="shortcut icon" href="ICON.png">
     <title>Controle Financeiro</title>
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="PARTE2.CSS">
     <link rel="stylesheet" href="resources/css/default.css">
+
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/shim.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        .zoom-container {
+            transform: scale(1.5); /* Aplica o zoom de 150% */
+            transform-origin: 0 0; /* Define a origem do zoom */
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Remove as barras de rolagem */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .content {
+            width: 66.67%; /* Ajusta a largura para compensar o zoom */
+        }
+    </style>
+
 </head>
 
 <body>
@@ -20,15 +45,14 @@
             <div class="navbar-brand">
                 <a href="#" class="brand"></a>
                 <h1 class="system-title">
-                    Controle financeiro
+                    Controle de Vendas
                 </h1>
             </div>
 
             <nav class="navbar-menu">
                 <li>
-                    <ul><a href="#">dashboard</a></ul>
-                    <ul><a href="#">resumo</a></ul>
-                    <ul><a href="#">configurações</a></ul>
+                    <ul><a href="#" id="clear-data">Limpar Extrato</a></ul>
+                    <ul><a href="#" id="save-to-server">Salvar Extrato</a></ul>
                 </li>
             </nav>
         </div>
@@ -37,17 +61,20 @@
     <main class="main-content">
         <div class="container">
             <section class="section-new-transaction">
-                <h1>Nova transação</h1>
+                <h1>Nova Venda</h1>
                 <form>
                     <label for="transaction-type">Tipo de transação</label>
                     <select name="input-transaction-type" id="transaction-type" required>
-                        <option value="1">Compra</option>
-                        <option value="2">Venda</option>
+                        <option value="1">Venda</option>
+                        <option value="2">Gasto</option>
+                        <option value="3">Caixa</option>
+                        <option value="4">Cancelamento</option>
                     </select>
 
                     <label for="name">Nome da mercadoria</label>
                     <input type="text" name="input-name" id="name" placeholder="Digite o nome da mercadoria" required>
-
+                    <label for="quantity">Quantidade</label>
+                    <input type="number" name="input-quantity" id="quantity" min="1" step="1" placeholder="1" required>
                     <label for="price">Valor (R$)</label>
                     <input type="number" name="input-price" id="price" min="0.01" step="0.01" placeholder="R$ 0,00" required>
 
@@ -60,9 +87,15 @@
                 <table class="table-transaction-statement">
                     <thead>
                         <tr>
-                            <th></th>
-                            <th>Mercadoria</th>
-                            <th>Valor</th>
+                            <thead>
+                                <tr>
+                                    <th>Tipo(Transação)</th>
+                                    <th>Mercadoria</th>
+                                    <th>Quantidade</th>
+                                    <th>Valor(Unit)</th>
+                                    <th>Valor Total</th>
+                                </tr>
+                            </thead>
                         </tr>
                     </thead>
 
@@ -76,9 +109,8 @@
 
                     <tfoot>
                         <tr>
-                            <th></th>
-                            <th><em>Total</em></th>
-                            <th><em>R$ <sub>[lucro]</sub></em></th>
+                            <th colspan="4">Total</th>
+                            <th><em>R$ <sub id="total-value">0.00</sub></em></th>
                         </tr>
                     </tfoot>
                 </table>
@@ -86,5 +118,134 @@
         </div>
     </main>
     <footer class="main-footer"></footer>
+    
+<script>
+    // Array para armazenar as transações
+    const transactions = []; // Array para armazenar transações
+
+// Função para adicionar uma nova transação
+function addTransaction(event) {
+    event.preventDefault(); // Evita o envio do formulário
+
+    // Obtém os valores dos campos do formulário
+    const type = document.getElementById('transaction-type').value;
+    const name = document.getElementById('name').value;
+    const price = parseFloat(document.getElementById('price').value);
+    const quantity = parseInt(document.getElementById('quantity').value) || 1; // Quantidade padrão 1
+
+    // Calcula o total
+    const total = price * quantity;
+
+    // Cria um objeto de transação e adiciona ao array
+    const transaction = { type, name, price, quantity, total };
+    transactions.push(transaction);
+
+    // Atualiza o extrato de transações
+    updateTransactionStatement();
+
+    // Limpa o formulário
+    document.querySelector('form').reset();
+}
+
+// Função para atualizar o extrato de transações na tabela
+function updateTransactionStatement() {
+    const tbody = document.querySelector('.table-transaction-statement tbody');
+    tbody.innerHTML = ''; // Limpa o conteúdo atual
+
+    // Adiciona cada transação na tabela
+    transactions.forEach((transaction) => {
+        const row = tbody.insertRow();
+        row.insertCell(0).innerText = getTransactionType(transaction.type);
+        row.insertCell(1).innerText = transaction.name;
+        row.insertCell(2).innerText = transaction.quantity;
+        row.insertCell(3).innerText = `R$ ${transaction.price.toFixed(2)}`;
+        // Adiciona o sinal de + ou - ao valor total dependendo do tipo de transação
+        row.insertCell(4).innerText = formatTransactionTotal(transaction);
+    });
+
+    // Atualiza o total
+    updateTotal();
+}
+
+// Função para formatar o valor total da transação com sinais
+function formatTransactionTotal(transaction) {
+    switch (transaction.type) {
+        case '1': // Venda
+            return `+ R$ ${transaction.total.toFixed(2)}`;
+        case '2': // Gasto
+        case '4': // Cancelamento
+            return `- R$ ${transaction.total.toFixed(2)}`;
+        case '3': // Caixa
+            return `R$ ${transaction.total.toFixed(2)}`;
+        default:
+            return `R$ ${transaction.total.toFixed(2)}`;
+    }
+}
+
+// Função para obter o tipo de transação como texto
+function getTransactionType(type) {
+    switch (type) {
+        case '1': return 'Venda';
+        case '2': return 'Gasto';
+        case '3': return 'Caixa';
+        case '4': return 'Cancelamento';
+        default: return 'Desconhecido';
+    }
+}
+
+// Função para atualizar o total de transações
+function updateTotal() {
+    const totalElement = document.getElementById('total-value');
+    const total = transactions.reduce((sum, transaction) => {
+        switch (transaction.type) {
+            case '1': // Venda
+            case '3': // Caixa
+                return sum + transaction.total;
+            case '2': // Gasto
+            case '4': // Cancelamento
+                return sum - transaction.total;
+            default:
+                return sum;
+        }
+    }, 0);
+
+    // Adiciona o sinal de + ou - ao total
+    totalElement.innerText = `${total >= 0 ? '+' : '-'} R$ ${Math.abs(total).toFixed(2)}`;
+}
+
+// Função para limpar os dados
+function clearData() {
+    if (transactions.length > 0) {
+        // Salva os dados no Excel antes de limpar
+        saveToExcel();
+
+        // Limpa o array de transações
+        transactions.length = 0;
+
+        // Atualiza a tabela
+        updateTransactionStatement();
+    } else {
+        alert('Nenhuma transação para limpar.');
+    }
+}
+
+// Função para salvar os dados no servidor em formato Excel
+function saveToExcel() {
+    // Usa SheetJS (XLSX) para criar um arquivo Excel
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(transactions, {
+        header: ['type', 'name', 'quantity', 'price', 'total']
+    });
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Transações");
+
+    // Salva o arquivo
+    XLSX.writeFile(workbook, `extrato_${new Date().toLocaleDateString()}.xlsx`);
+}
+
+// Eventos
+document.querySelector('form').addEventListener('submit', addTransaction);
+document.getElementById('clear-data').addEventListener('click', clearData);
+document.getElementById('save-to-server').addEventListener('click', saveToExcel);
+</script>
 </body>
 </html>
